@@ -1,18 +1,16 @@
 import random
 import sys
-
+from textblob import TextBlob
 from nplc import NPLC	#this object creates noun phrases from texts
 from rhymebot import rhyme_set, rhyming_word # 
-# from guessSyllables import gib_syls
 
 #### add markov generator for military text
 from markov import MarkovGenerator
-military = MarkovGenerator(2, 20)
-#military.feed('../texts/militaryrules.txt')
+military = MarkovGenerator(2, 1)
 for line in open('../texts/militaryrules.txt', 'r'):
 	military.feed(line.decode('ascii', errors='replace'))
 
-# post = NPLC('../texts/etiquette.txt', 2)
+post = NPLC('../texts/etiquette.txt', 2)
 
 
 """ dictionary of words with number of syllables as the key """
@@ -99,22 +97,59 @@ def not_a_vowel(letter):
 # 		y.append(z)
 # print " ".join(y)
 
+def gSyls(aword):
+	if aword.upper() in all_words:
+		return syl_bible[aword.upper()]
+	else:
+		return gib_syls(aword)
 
-for line in sys.stdin:
-	line = line.strip()
-	words = line.split()
+
+def makeLine(words):
 	new_line = ""
-	for word in words:
+	skip = 0
+	previous = None
+	thenext = None
+	for index, word in enumerate(words):
+		if index > 0:
+			previous = words[index - 1]
+		if len(words) > index+1:
+			thenext = words[index + 1]
+
+		# if it needs to skip, then skip
+		if skip > 0:
+			skip = skip - 1
+		elif word in military.all_words:
+			agram = military.generate(word)
+			if gSyls(agram[1]) != gSyls(thenext):
+				continue
+			else:
+				new_line = new_line + " " + agram
+				skip = len(agram.split()) - 1
 		if word.upper() in all_words:
 			new_word = rhyming_word(word, 1)
 			if new_word:
 				new_line = new_line + " " + new_word
 			else:
 				new_word = random.choice(syl_lookup[syl_bible[word.upper()]])
-				new_line = new_line + " " + new_word
-			# print word + " is in the word bible and has " + str(syl_bible[word.upper()]) + " syllables"
+				new_line = new_line + " " + new_word.lower()
 		else:
 			gibSyl = gib_syls(word)
 			new_word = random.choice(syl_lookup[gibSyl])
 			new_line = new_line + " " + str(new_word).lower()
-	print new_line
+	return new_line
+
+def nounize(aline):
+	words = ''
+	aline = TextBlob(aline.decode('ascii', errors='replace'))
+	for word, tag in aline.tags:
+		if tag == 'NN':
+			word = post.random_np()
+		words = words + ' ' + word
+	return words
+
+for line in sys.stdin:
+	line = line.strip()
+	words = line.split()
+	aLine = makeLine(words)
+	print aLine
+	print nounize(aLine)
