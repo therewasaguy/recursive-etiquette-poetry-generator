@@ -1,12 +1,19 @@
 #guess syllables of gibberish i.e. "da dadum dum dum dee do" "shoobee doowah" "boo boo kachu"
 import sys
 
-ngrams = dict()
 n = 3
 
-def gibs(aWord):
+def gib_syls(aWord):
 	sylz = 0
 	characters = list(aWord)
+
+	#test first letter
+	if not_a_vowel(characters[0]):
+		sylz = 0
+	else:
+		sylz = 1
+
+	#test ngrams
 	for c in range(len(characters) - n+1):
 		gram = tuple(characters[c:c+n])
 		curChar = gram[1]
@@ -36,9 +43,9 @@ def not_a_vowel(letter):
 	return True
 
 
-# fill in blanks
-
-# if - two syllables
+## TO DO ##
+# def fill_in_blanks
+# def synonym
 
 
 for line in sys.stdin:
@@ -46,7 +53,7 @@ for line in sys.stdin:
 	words = line.split()
 	syls = ""
 	for word in words:
-		gibSyl = gibs(word)
+		gibSyl = gib_syls(word)
 		syls = syls + " " + str(gibSyl)
 	print syls
 
