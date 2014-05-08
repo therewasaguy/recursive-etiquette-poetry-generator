@@ -6,11 +6,11 @@ from rhymebot import rhyme_set, rhyming_word #
 # from guessSyllables import gib_syls
 
 #### add markov generator for military text
-# from markov import MarkovGenerator
-# military = MarkovGenerator(2, 20)
-# #military.feed('../texts/militaryrules.txt')
-# for line in open('../texts/militaryrules.txt', 'r'):
-# 	military.feed(line.decode('ascii', errors='replace'))
+from markov import MarkovGenerator
+military = MarkovGenerator(2, 20)
+#military.feed('../texts/militaryrules.txt')
+for line in open('../texts/militaryrules.txt', 'r'):
+	military.feed(line.decode('ascii', errors='replace'))
 
 # post = NPLC('../texts/etiquette.txt', 2)
 
@@ -103,18 +103,18 @@ def not_a_vowel(letter):
 for line in sys.stdin:
 	line = line.strip()
 	words = line.split()
-	syls = ""
+	new_line = ""
 	for word in words:
 		if word.upper() in all_words:
 			new_word = rhyming_word(word, 1)
 			if new_word:
-				syls = syls + " " + new_word
+				new_line = new_line + " " + new_word
 			else:
 				new_word = random.choice(syl_lookup[syl_bible[word.upper()]])
-				syls = syls + " " + new_word
+				new_line = new_line + " " + new_word
 			# print word + " is in the word bible and has " + str(syl_bible[word.upper()]) + " syllables"
 		else:
 			gibSyl = gib_syls(word)
 			new_word = random.choice(syl_lookup[gibSyl])
-			syls = syls + " " + str(new_word).lower()
-	print syls
+			new_line = new_line + " " + str(new_word).lower()
+	print new_line

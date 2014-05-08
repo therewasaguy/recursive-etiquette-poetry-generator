@@ -6,6 +6,7 @@ class MarkovGenerator(object):
     self.max = max # maximum number of elements to generate
     self.ngrams = dict() # ngrams as keys; next elements as values
     self.beginnings = list() # beginning ngram of every line
+    self.all_words = list() # all words
 
   def tokenize(self, text):
     return text.split(" ")
@@ -13,7 +14,6 @@ class MarkovGenerator(object):
   def feed(self, text):
 
     tokens = self.tokenize(text)
-
     # discard this line if it's too short
     if len(tokens) < self.n:
       return
@@ -25,6 +25,7 @@ class MarkovGenerator(object):
     for i in range(len(tokens) - self.n):
 
       gram = tuple(tokens[i:i+self.n])
+      self.all_words.append(gram)
       next = tokens[i+self.n] # get the element after the gram
 
       # if we've already seen this ngram, append; otherwise, set the
@@ -39,7 +40,7 @@ class MarkovGenerator(object):
     return " ".join(source)
 
   # generate a text from the information in self.ngrams
-  def generate(self):
+  def generate_beginning(self):
 
     from random import choice
 
@@ -60,7 +61,28 @@ class MarkovGenerator(object):
 
     output_str = self.concatenate(output)
     return output_str
-    
+
+      # generate a text from the information in self.ngrams
+  def generate(self, start_word):
+    from random import choice
+    # get a random line beginning; convert to a list. 
+    # current = choice(self.all_words)
+    current = choice([item for item in self.ngrams if item[0] == start_word])
+    output = list(current)
+
+    for i in range(self.max):
+      if current in self.ngrams:
+        possible_next = self.ngrams[current]
+        next = choice(possible_next)
+        output.append(next)
+        # get the last N entries of the output; we'll use this to look up
+        # an ngram in the next iteration of the loop
+        current = tuple(output[-self.n:])
+      else:
+        break
+
+    output_str = self.concatenate(output)
+    return output_str
 
 if __name__ == '__main__':
 
