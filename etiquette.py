@@ -13,7 +13,13 @@ for line in open('../texts/dickens_bleakhouse.txt', 'r'):
 # 	military.feed(line) #decode('ascii', errors='replace')
 
 post = NPLC('../texts/etiquette.txt', 2)
+etiquettenp = open("etiquette_noun_phrases.txt", "wb")
+for i in post.noun_phrases:
+	etiquettenp.write(i.encode('utf-8', errors='replace').strip() + '\n')
 # print " ".join(post.noun_phrases)
+etiquettenp.close()
+
+print "done writing file!"
 
 """ dictionary of words with number of syllables as the key """
 syl_bible = {} #number of syllables in the word
@@ -178,6 +184,21 @@ for line in sys.stdin:
 			if z: 
 				y.append(z)
 		print " ".join(y)
+
+# #
+# sentence
+# a noun_phrases(1) --> 2 syllables
+# a noun_phrases(1) --> 2 syllables
+# a noun_phrases(1) --> 3 syllables
+# a nounphrase (4) --> 5 syllables
+# sentence
+# a noun_phrases(1) x 3. --> 2 syllables
+# a nounphrase (4) --> 5 syllables
+# question (army markov gen)
+# question (army markov gen)
+# question (army markov gen)
+# a noun_phrases(1) x 3 --> 2 syllables
+# a nounphrase (4) --> 5 syllables
 
 	# for word in words:
 	# 	armyVersion = makeLine(word)
