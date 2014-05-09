@@ -6,12 +6,14 @@ from rhymebot import rhyme_set, rhyming_word #
 
 #### add markov generator for military text
 from markov import MarkovGenerator
-military = MarkovGenerator(2, 1)
-for line in open('../texts/militaryrules.txt', 'r'):
-	military.feed(line.decode('ascii', errors='replace'))
+military = MarkovGenerator(2, 10)
+for line in open('../texts/dickens_bleakhouse.txt', 'r'):
+	military.feed(line) #decode('ascii', errors='replace')
+# for line in open('../texts/militaryrules.txt', 'r'):
+# 	military.feed(line) #decode('ascii', errors='replace')
 
 post = NPLC('../texts/etiquette.txt', 2)
-
+# print " ".join(post.noun_phrases)
 
 """ dictionary of words with number of syllables as the key """
 syl_bible = {} #number of syllables in the word
@@ -105,37 +107,15 @@ def gSyls(aword):
 
 
 def makeLine(words):
-	new_line = ""
-	skip = 0
-	previous = None
-	thenext = None
-	for index, word in enumerate(words):
-		if index > 0:
-			previous = words[index - 1]
-		if len(words) > index+1:
-			thenext = words[index + 1]
-
-		# if it needs to skip, then skip
-		if skip > 0:
-			skip = skip - 1
-		elif word in military.all_words:
+	words = words.split()
+	new_line = ''
+	for word in words:
+		if word in military.all_words:
 			agram = military.generate(word)
-			if gSyls(agram[1]) != gSyls(thenext):
-				continue
-			else:
-				new_line = new_line + " " + agram
-				skip = len(agram.split()) - 1
-		if word.upper() in all_words:
-			new_word = rhyming_word(word, 1)
-			if new_word:
-				new_line = new_line + " " + new_word
-			else:
-				new_word = random.choice(syl_lookup[syl_bible[word.upper()]])
-				new_line = new_line + " " + new_word.lower()
+			new_line = new_line + " " + agram
 		else:
-			gibSyl = gib_syls(word)
-			new_word = random.choice(syl_lookup[gibSyl])
-			new_line = new_line + " " + str(new_word).lower()
+			new_line = new_line + " " + word
+	#print new_line
 	return new_line
 
 def nounize(aline):
@@ -147,9 +127,76 @@ def nounize(aline):
 		words = words + ' ' + word
 	return words
 
+def changeWord(word):
+	new_word = ''
+	nounize(word)
+	if word.upper() in all_words:
+		new_word = rhyming_word(word, 1)
+		if new_word:
+			return new_word.lower()
+		else:
+			new_word = str(random.choice(syl_lookup[syl_bible[word.upper()]]))
+			# new_line = new_line + " " + new_word.lower()
+	else:
+		gibSyl = gib_syls(word)
+		new_word = str(random.choice(syl_lookup[gibSyl]))
+		# new_line = new_line + " " + 
+	return new_word.lower() + " " + post.random_np()
+
+def redo_line(line):
+	words = line.split()
+	if len(words) > 0:
+		w = words.pop()
+		y = changeWord(w)
+		if len(words) > 8:  #crucial variable
+			new_line = ' '.join(words)
+			try:
+				print ' '.join(new_line.split()[-7:]) + " " +y.lower()
+			except:
+				print ' '.join(new_line.split()[-1:])
+			redo_line(new_line)
+
 for line in sys.stdin:
 	line = line.strip()
 	words = line.split()
-	aLine = makeLine(words)
-	print aLine
-	print nounize(aLine)
+
+	# new stuff
+	for word in words:
+		# print rhyming_word(word, 2)
+		x = post.random_np()
+		firstArmyVersion = makeLine(word)
+		# print x
+		# print firstArmyVersion
+		armyVersion = makeLine(x)
+		# print armyVersion
+		redo_line(firstArmyVersion)
+		redo_line(x)
+		redo_line(armyVersion)
+		y = []
+		for i in x.split():
+			z = rhyming_word(i, 3)
+			if z: 
+				y.append(z)
+		print " ".join(y)
+
+	# for word in words:
+	# 	armyVersion = makeLine(word)
+	# 	print armyVersion
+	# 	redo_line(armyVersion)
+	# 	manneredVersion = nounize(armyVersion)
+	# 	print manneredVersion
+	# 	redo_line(manneredVersion)
+	# aLine = makeLine(words)
+	# print aLine
+	# redo_line(aLine)
+	# nLine = nounize(aLine)
+	# print nLine
+	# redo_line(nLine)
+	# changedLine = ''
+	# for each_word in aLine.split():
+	# 	changedLine = changedLine + ' ' + changeWord(each_word)
+	# print changedLine
+	# changedLine = ''
+	# for each_word in nLine.split():
+	# 	changedLine = changedLine + ' ' + changeWord(each_word)
+	# redo_line(changedLine)
