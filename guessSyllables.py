@@ -1,9 +1,9 @@
 #guess syllables of gibberish i.e. "da dadum dum dum dee do" "shoobee doowah" "boo boo kachu"
 import sys
 
-n = 3
 
 def gib_syls(aWord):
+	n = 3
 	sylz = 0
 	characters = list(aWord)
 

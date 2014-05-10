@@ -53,6 +53,13 @@ class MarkovGenerator(object):
         possible_next = self.ngrams[current]
         next = choice(possible_next)
         output.append(next)
+        for i in next:
+          if i == ".":
+            break
+          if i == ",":
+            break
+          if i == "?":
+            break
         # get the last N entries of the output; we'll use this to look up
         # an ngram in the next iteration of the loop
         current = tuple(output[-self.n:])
