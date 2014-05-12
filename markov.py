@@ -69,10 +69,11 @@ class MarkovGenerator(object):
     output_str = self.concatenate(output)
     return output_str
 
-      # generate a text from the information in self.ngrams
+  # Generate a text from the information in self.ngrams
   def generate(self, start_word):
     from random import choice
 
+    # If the start word is in the text, generate a markov chain
     if start_word in self.all_words:
       current = choice([item for item in self.ngrams if item[0] == start_word])
       output = list(current)
@@ -82,8 +83,6 @@ class MarkovGenerator(object):
           possible_next = self.ngrams[current]
           next = choice(possible_next)
           output.append(next)
-          # get the last N entries of the output; we'll use this to look up
-          # an ngram in the next iteration of the loop
           current = tuple(output[-self.n:])
         else:
           break
@@ -91,19 +90,12 @@ class MarkovGenerator(object):
       output_str = self.concatenate(output)
       return output_str
     else:
-      return
+      return ''
 
 if __name__ == '__main__':
 
   import sys
 
-  # generator = MarkovGenerator(n=3, max=500)
-  # for line in sys.stdin:
-  #   line = line.strip()
-  #   generator.feed(line)
-
-  # for i in range(14):
-  #   print generator.generate()
 
 # from markov import MarkovGenerator
   army = MarkovGenerator(2, 2)

@@ -4,40 +4,37 @@ from textblob import TextBlob, Word
 from nplc import NPLC	#this object creates noun phrases from texts
 from rhymebot import rhyme_set, rhyming_word # 
 
-#### add markov generators ####
+#### add markov generator named underground and feed it all the source text ####
 from markov import MarkovGenerator
-# bleakhouse = MarkovGenerator(5, 20)
-# bleakhousetext = []
-# for line in open('../texts/dickens_bleakhouse.txt', 'r'):
-# 	bleakhousetext.append(line + ' ')
-# bleak_sentences = TextBlob(" ".join(bleakhousetext).decode('ascii', errors='replace')).sentences
-# for sentence in bleak_sentences:
-# 	bleakhouse.feed(sentence)
-
-# print "checkin 1"
-
-
-print "checkin 1"
-
 underground = MarkovGenerator(5, 6)
+
 utext = []
-for line in open('../texts/notesfromunderground.txt', 'r'):
+for line in open('notesfromunderground.txt', 'r'):
 	utext.append(line + ' ')
 utext_sentences = TextBlob(" ".join(utext).decode('ascii', errors='replace')).sentences
 for sentence in utext_sentences:
 	underground.feed(sentence)
 
-print "checkin 2"
+print 'loaded 1/3'
 
-# sailor = MarkovGenerator(5, 20)
 sailortext = []
-for line in open('../texts/sailorswordbook.txt', 'r'):
+for line in open('sailorswordbook.txt', 'r'):
 	sailortext.append(line + ' ')
 sailor_sentences = TextBlob(" ".join(sailortext).decode('ascii', errors='replace')).sentences
 for sentence in sailor_sentences:
 	underground.feed(sentence)
 
-print 'checking 3'
+print 'loaded 2/3'
+
+posttext = []
+for line in open('etiquette.txt', 'r'):
+	posttext.append(line + ' ')
+post_sentences = TextBlob(" ".join(posttext).decode('ascii', errors='replace')).sentences
+for sentence in post_sentences:
+	underground.feed(sentence)
+
+print 'loaded 3/3'
+print ' '
 
 #### add noun phrases ####
 postnouns = []
@@ -65,8 +62,8 @@ def ensure_caps(line):
 		return True
 
 
-# This function figures out what preposition to put before a Noun Phrase
-#  based on whether it is plural and the starting letter.
+# This function tries to figures out what preposition to put before
+# a Noun Phrase based on whether it is plural and based on its starting letter.
 def preposition(line):
 	first_letter = line[0]
 	for word in line.split():
@@ -89,7 +86,7 @@ def preposition(line):
 		return random.choice(['An ', 'The ', '']) + line
 
 
-
+# Generates a line from the Markov chain and ensures that it is capitalized
 def generate_opening_line():
 	next_line = underground.generate_beginning()
 	while ensure_caps(next_line):
@@ -100,48 +97,16 @@ def generate_opening_line():
 
 def generate_question():
 	next_line = underground.generate(random.choice(['What', 'How', 'Why', 'When', 'Where']))
-	# while ensure_caps(next_line):
-	# next_line = underground.generate_beginning()
-	# 	if ensure_caps(next_line) == False:
-	# 		break
 	return next_line
 
 
 
-
-# figure out how to preposition
-# ensure_caps(underground.generate_beginning())
-# print underground.generate_beginning()
-# print "a " + random.choice(sailornouns)
-# print "a " + random.choice(sailornouns)
-# # find one with a length of 4+
-# print "a " + random.choice(postnouns)
-# print bleakhouse.generate_beginning()
-# print "a " + random.choice(sailornouns)
-# print "a " + random.choice(sailornouns)
-# # find one with a length of 4+
-# print "a " + random.choice(postnouns)
-# print sailor.generate_beginning()
-# print "a " + random.choice(sailornouns)
-# print "a " + random.choice(sailornouns)
-# # find one with a length of 4+
-# print "a " + random.choice(postnouns)
-# print "a " + random.choice(sailornouns)
-# print "a " + random.choice(sailornouns)
-# # find one with a length of 4+
-# print "a " + random.choice(postnouns)
-
-
-
-# for line in open('../texts/militaryrules.txt', 'r'):
-# 	military.feed(line) #decode('ascii', errors='replace')
 
 ### used to write the text file of Noun Phrases
 # post = NPLC('../texts/sailorswordbook.txt', 4)
 # npz = open("sailor_nouns.txt", "wb")
 # for i in post.noun_phrases:
 # 	npz.write(i.encode('utf-8', errors='replace').strip() + '\n')
-# # print " ".join(post.noun_phrases)
 # npz.close()
 
 # print "done!"
@@ -171,7 +136,7 @@ for line in open('cmu_rhymedict.txt'):
 
 all_words = list(syl_bible.keys())
 
-""" guess syllables #guess syllables of gibberish i.e. "da dadum dum dum dee do" "shoobee doowah" "boo boo kachu"""
+""" guess # of syllables in a series of gibberish, i.e. "da dadum dum dum dee do" "shoobee doowah" "boo boo kachu"""
 def gib_syls(aWord):
 	n = 3
 	sylz = 0
@@ -207,30 +172,13 @@ def gib_syls(aWord):
 
 
 
-## TO DO ##
-# def fill_in_blanks
-# def synonym
-
-## fun stuff happens here ///////////////////////////// commented temporarily
-# x = post.random_np()
-# x = x + " " + military.generate()
-# print x
-# y = []
-# for i in x.split():
-# 	z = rhyming_word(i, 3)
-# 	if z == None:
-# 		pass
-# 	else: 
-# 		y.append(z)
-# print " ".join(y)
-
 def gSyls(aword):
 	if aword.upper() in all_words:
 		return syl_bible[aword.upper()]
 	else:
 		return gib_syls(aword)
 
-
+# Generate a markov chain that starts with each word in a set of phrases
 def makeLine(words, marko):
 	words = words.split()
 	new_line = ''
@@ -252,9 +200,13 @@ def nounize(aline):
 		words = words + ' ' + word
 	return words
 
+
+## This function takes a word an changes it to another word that rhymes or has the same # of syllables.
+## Sometimes, it also appends a random nounphrase 
+## rhyming_word is in a separate file, the rhymebot module. 
 def changeWord(word):
 	new_word = ''
-	nounize(word)
+	#	nounize(word)
 	if word.upper() in all_words:
 		new_word = rhyming_word(word, 1)
 		if new_word:
@@ -268,6 +220,9 @@ def changeWord(word):
 		# new_line = new_line + " " + 
 	return new_word.lower() + " " + random.choice(postnouns + sailornouns).strip()
 
+
+## This function iterates recursively through a line, three words at a time.
+## It transforming the last word each time by calling the changeWord function.
 def redo_line(line):
 	words = line.split()
 	if len(words) > 0:
@@ -298,66 +253,68 @@ def redo_line(line):
 			print words[0] + ' ' + y
 			print underground.generate(words[0])
 			print underground.generate(words[0])
-			print words[0]
+			print words[0] + w
 			return 
 
 
 
-# print generate_opening_line()
-# x = random.choice(postnouns)
-# print preposition(x)
-# x = random.choice(postnouns)
-# print preposition(x)
-# x = random.choice(postnouns)
-# print preposition(x)
-# x = random.choice(sailornouns)
-# print preposition(x)
+### GENERATE THE POEM ###
 
+# Generate a capitalized opening line from Markov beginnings
 opening_line = generate_opening_line()
+
+# Generate three noun phrases
 nOne = random.choice(postnouns).strip()
 nTwo = random.choice(postnouns).strip()
 nThree = random.choice(sailornouns).strip()
 
+
+# Sort the noun phrases by length
 if len(nOne) > len(nTwo):
 	nX = nOne
-	nTwo = nOne
-	nOne = nX
+	nOne = nTwo
+	nTwo = nX
 
 if len(nTwo) > len(nThree):
 	nX = nTwo
-	nThree = nTwo
-	nTwo = nX
+	nTwo = nThree
+	nThree = nX
 
+# Poetic structure
 print preposition(nOne)
 print preposition(nTwo)
 print preposition(nThree)
-
+print ''
 print opening_line
+print ''
 print preposition(nOne)
 print preposition(nTwo)
 print preposition(nThree)
+print ''
 print generate_opening_line()
+print ''
 print preposition(nOne)
 print random.choice(sailornouns + postnouns)
 print random.choice(sailornouns + postnouns)
 print random.choice(sailornouns + postnouns)
 print preposition(nThree)
+print ''
 print underground.generate(nOne.split()[0])
 print underground.generate(nOne.split()[1])
 
 q = generate_question()
-q = generate_question()
-q = generate_question()
+print q + '?'
 print ' '
 print preposition(nOne)
 print preposition(nTwo)
 print preposition(nThree)
-
-
+print ''
 print generate_question()
 print random.choice(postnouns).strip()
+print ''
 print generate_question()
 print random.choice(postnouns).strip()
+print ''
 print generate_opening_line()
 print random.choice(postnouns).strip()
 print generate_question()
@@ -374,84 +331,3 @@ redo_line(opening_line)
 print preposition(nOne)
 print preposition(nTwo)
 print preposition(nThree)
-
-# x = random.choice(sailornouns).strip()
-# print preposition(x) + '?'
-# print q
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# for line in sys.stdin:
-# 	line = line.strip()
-# 	words = line.split()
-
-# 	# new stuff
-# 	for word in words:
-# 		x = post.random_np()
-# 		print x
-
-
-
-# 		firstArmyVersion = makeLine(word, bleakhouse)
-# 		armyVersion = makeLine(x, bleakhouse)
-# 		redo_line(firstArmyVersion)
-# 		redo_line(x)
-# 		redo_line(armyVersion)
-# 		y = []
-# 		for i in x.split():
-# 			z = rhyming_word(i, 3)
-# 			if z: 
-# 				y.append(z)
-# 		print " ".join(y)
-
-# #
-# sentence
-# a noun_phrases(1) --> 2 syllables
-# a noun_phrases(1) --> 2 syllables
-# a noun_phrases(1) --> 3 syllables
-# a nounphrase (4) --> 5 syllables
-# sentence
-# a noun_phrases(1) x 3. --> 2 syllables
-# a nounphrase (4) --> 5 syllables
-# question (army markov gen)
-# question (army markov gen)
-# question (army markov gen)
-# a noun_phrases(1) x 3 --> 2 syllables
-# a nounphrase (4) --> 5 syllables
-
-	# for word in words:
-	# 	armyVersion = makeLine(word)
-	# 	print armyVersion
-	# 	redo_line(armyVersion)
-	# 	manneredVersion = nounize(armyVersion)
-	# 	print manneredVersion
-	# 	redo_line(manneredVersion)
-	# aLine = makeLine(words)
-	# print aLine
-	# redo_line(aLine)
-	# nLine = nounize(aLine)
-	# print nLine
-	# redo_line(nLine)
-	# changedLine = ''
-	# for each_word in aLine.split():
-	# 	changedLine = changedLine + ' ' + changeWord(each_word)
-	# print changedLine
-	# changedLine = ''
-	# for each_word in nLine.split():
-	# 	changedLine = changedLine + ' ' + changeWord(each_word)
-	# redo_line(changedLine)
