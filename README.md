@@ -3,7 +3,7 @@ recursive-etiquette: poetry generator
 
 This repo has several Python scripts that helped me generate poetry.
 
-The main program is **etiquette.py** -- Generate some poetry from three included source texts: Etiquette, Notes From Underground, and Sailor's Words. The process is described in detail on [my blog](http://www.itp.jasonsigal.cc/the-phrases-and-pronunciation/).
+The main program is **etiquette.py**: Generate some poetry from three included source texts: Etiquette, Notes From Underground, and Sailor's Words. The process is described in detail on [my blog](http://www.itp.jasonsigal.cc/the-phrases-and-pronunciation/).
 
 **guessSyllables.py** Guess syllables of gibberish phrases i.e. "da dadum dum dum dee do" "shoobee doowah" "boo boo kachu".
 
